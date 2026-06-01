@@ -1,4 +1,4 @@
-# 🥬 Lettuce IMS v4.0 — Structured Edition
+# 🥬 Ice Cream IMS v4.0 — Structured Edition
 
 A production-ready Inventory Management System rebuilt from a monolithic HTML file into a
 **React + TypeScript** application with **Angular-style architecture**, **Supabase** backend,
