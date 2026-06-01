@@ -1,17 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&display=swap');
+
+/* ── Base ── */
 .badge {
   display: inline-flex;
   align-items: center;
+  gap: 5px;
   padding: 3px 10px;
   border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.72rem;
+  font-weight: 800;
+  font-family: 'Baloo 2', sans-serif;
   letter-spacing: 0.3px;
   white-space: nowrap;
+  animation: badgePopIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes badgePopIn {
+  from { opacity: 0; transform: scale(0.6); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
-.inStock     { background: var(--bg-badge-stock);     color: var(--text-badge-stock);     }
-.lowStock    { background: var(--bg-badge-low);       color: var(--text-badge-low);       }
-.outOfStock  { background: var(--bg-badge-out);       color: var(--text-badge-out);       }
-.pending     { background: var(--bg-badge-pending);   color: var(--text-badge-pending);   }
-.fulfilled   { background: var(--bg-badge-fulfilled); color: var(--text-badge-fulfilled); }
-.cancelled   { background: var(--bg-badge-cancelled); color: var(--text-badge-cancelled); }
+/* dot before label */
+.badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+/* ── Stock variants ── */
+
+/* 🍦 Mint — in stock, all good */
+.inStock {
+  background: #E1F5EE;
+  color: #0F6E56;
+}
+
+/* 🍊 Vanilla/amber — low stock, caution */
+.lowStock {
+  background: #FAEEDA;
+  color: #854F0B;
+  animation: badgePopIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both,
+             lowPulse 2.2s ease-in-out 0.5s infinite;
+}
+@keyframes lowPulse {
+  0%, 100% { box-shadow: 0 0 0 0   rgba(186, 117, 23, 0.4); }
+  50%       { box-shadow: 0 0 0 4px rgba(186, 117, 23, 0); }
+}
+
+/* 🍒 Cherry — out of stock, alert */
+.outOfStock {
+  background: #fde8ea;
+  color: #B91C3A;
+  animation: badgePopIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both,
+             outPulse 1.8s ease-in-out 0.5s infinite;
+}
+@keyframes outPulse {
+  0%, 100% { box-shadow: 0 0 0 0   rgba(232, 72, 90, 0.45); }
+  50%       { box-shadow: 0 0 0 5px rgba(232, 72, 90, 0); }
+}
+
+/* ── Order variants ── */
+
+/* 🍦 Strawberry — pending */
+.pending {
+  background: #fce7f3;
+  color: #9D174D;
+}
+
+/* 🫐 Ube — fulfilled */
+.fulfilled {
+  background: #EEEDFE;
+  color: #4338CA;
+}
+
+/* neutral grey-pink — cancelled */
+.cancelled {
+  background: #F3F3F5;
+  color: #6B7280;
+  opacity: 0.85;
+}
+/* strikethrough dot for cancelled */
+.cancelled::before {
+  opacity: 0.35;
+}

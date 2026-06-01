@@ -1,5 +1,5 @@
 // ============================================================
-//  SettingsService  (Angular-style singleton service)
+//  SettingsService  –  App settings CRUD
 // ============================================================
 
 import { SupabaseClient } from "@supabase/supabase-js";
@@ -13,7 +13,7 @@ import { supabase } from "../supabase/client";
 const TABLE = "app_settings";
 
 const DEFAULTS: Omit<AppSettings, "id" | "farm_id" | "updated_at"> = {
-  app_name: "AG Lettuce Be Fresh",
+  app_name: "Chriselle Ice Cream",
   low_stock_threshold: 15,
   currency: "PHP",
   custom_columns: [],
@@ -35,10 +35,9 @@ export class SettingsService {
       .maybeSingle();
 
     if (error) return { data: null, error: error.message };
-
     if (data) return { data: data as AppSettings, error: null };
 
-    // First-time: create default settings row
+    // First-time: seed default settings row
     const { data: created, error: createErr } = await this.client
       .from(TABLE)
       .insert({ farm_id: farmId, ...DEFAULTS })
@@ -73,8 +72,9 @@ export class SettingsService {
     if (currentColumns.some((c) => c.key === key)) {
       return { data: null, error: `Column "${name}" already exists` };
     }
-    const updated = [...currentColumns, { name, key }];
-    return this.update(farmId, { custom_columns: updated });
+    return this.update(farmId, {
+      custom_columns: [...currentColumns, { name, key }],
+    });
   }
 
   async removeCustomColumn(
@@ -82,8 +82,9 @@ export class SettingsService {
     currentColumns: CustomColumn[],
     key: string,
   ): Promise<ServiceResult<AppSettings>> {
-    const updated = currentColumns.filter((c) => c.key !== key);
-    return this.update(farmId, { custom_columns: updated });
+    return this.update(farmId, {
+      custom_columns: currentColumns.filter((c) => c.key !== key),
+    });
   }
 }
 

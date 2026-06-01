@@ -20,9 +20,15 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children, requiredRole }) 
   if (isLoading) {
     return (
       <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        minHeight: '100vh', background: 'var(--bg-primary)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        background: 'var(--bg-page)',
+        gap: '16px',
       }}>
+        <span style={{ fontSize: '3rem' }}>🍦</span>
         <div className="spinner" />
       </div>
     );

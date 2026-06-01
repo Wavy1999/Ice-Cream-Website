@@ -1,5 +1,5 @@
 // ============================================================
-//  AG Lettuce Be Fresh – Supabase Client
+//  Chriselle Ice Cream – Supabase Client
 //  Singleton pattern matching Angular's providedIn: 'root'.
 //  Import { supabase } anywhere; never instantiate directly.
 // ============================================================

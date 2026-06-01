@@ -1,87 +1,205 @@
+@import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&display=swap");
+
+/* ── Base ── */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 7px;
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: 12px;
   cursor: pointer;
-  font-family: inherit;
-  font-weight: 600;
+  font-family: "Baloo 2", sans-serif;
+  font-weight: 800;
   letter-spacing: 0.2px;
-  transition: all var(--transition-normal);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease;
   text-decoration: none;
   white-space: nowrap;
   position: relative;
   overflow: hidden;
 }
-.btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
 
-/* Sizes */
-.sm  { padding: 7px 14px;  font-size: 0.82rem; }
-.md  { padding: 10px 20px; font-size: 0.9rem;  }
-.lg  { padding: 13px 28px; font-size: 1rem;    }
-.fullWidth { width: 100%; }
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
 
-/* Variants */
+/* shine sweep on hover */
+.btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.22),
+    transparent
+  );
+  transform: translateX(-100%);
+  transition: transform 0.38s ease;
+}
+.btn:hover:not(:disabled)::after {
+  transform: translateX(100%);
+}
+
+/* ── Sizes ── */
+.sm {
+  padding: 7px 16px;
+  font-size: 0.82rem;
+}
+.md {
+  padding: 10px 22px;
+  font-size: 0.9rem;
+}
+.lg {
+  padding: 13px 30px;
+  font-size: 1rem;
+}
+.fullWidth {
+  width: 100%;
+}
+
+/* ── Primary — strawberry pink ── */
 .primary {
-  background: var(--green-600);
+  background: #ec4899;
   color: #fff;
+  box-shadow: 0 2px 10px rgba(236, 72, 153, 0.3);
 }
 .primary:hover:not(:disabled) {
-  background: var(--green-700);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  background: #db2777;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(219, 39, 119, 0.38);
+}
+.primary:active:not(:disabled) {
+  transform: translateY(0);
 }
 
+/* ── Success — mint green ── */
 .success {
-  background: var(--green-500);
+  background: #1d9e75;
   color: #fff;
+  box-shadow: 0 2px 10px rgba(29, 158, 117, 0.28);
 }
 .success:hover:not(:disabled) {
-  background: var(--green-600);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  background: #0f6e56;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(15, 110, 86, 0.32);
+}
+.success:active:not(:disabled) {
+  transform: translateY(0);
 }
 
+/* ── Danger — cherry red ── */
 .danger {
-  background: var(--accent-red);
+  background: #e8485a;
   color: #fff;
+  box-shadow: 0 2px 10px rgba(232, 72, 90, 0.28);
 }
 .danger:hover:not(:disabled) {
   background: #c0392b;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(192, 57, 43, 0.32);
+}
+.danger:active:not(:disabled) {
+  transform: translateY(0);
 }
 
+/* ── Cancel — soft blush ── */
 .cancel {
-  background: var(--bg-secondary);
-  color: var(--text-secondary);
-  border: 1.5px solid var(--border-color);
+  background: #fce7f3;
+  color: #be185d;
+  border: 1.5px solid #f9a8d4;
 }
 .cancel:hover:not(:disabled) {
-  background: var(--border-color);
-  color: var(--text-primary);
+  background: #f9a8d4;
+  color: #831843;
+  transform: translateY(-1px);
+}
+.cancel:active:not(:disabled) {
+  transform: translateY(0);
 }
 
+/* ── Ghost — outlined berry ── */
 .ghost {
   background: transparent;
-  color: var(--text-secondary);
-  border: 1.5px solid var(--border-color);
+  color: #be185d;
+  border: 1.5px solid #f9a8d4;
 }
 .ghost:hover:not(:disabled) {
-  background: var(--bg-secondary);
-  color: var(--text-primary);
+  background: #fce7f3;
+  color: #831843;
+  border-color: #ec4899;
+  transform: translateY(-1px);
+}
+.ghost:active:not(:disabled) {
+  transform: translateY(0);
 }
 
+/* ── Vanilla — soft warm CTA ── */
+.vanilla {
+  background: #faeeda;
+  color: #854f0b;
+  border: 1.5px solid #fac775;
+}
+.vanilla:hover:not(:disabled) {
+  background: #fac775;
+  color: #633806;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(186, 117, 23, 0.22);
+}
+.vanilla:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* ── Ube — purple accent ── */
+.ube {
+  background: #eeedfe;
+  color: #534ab7;
+  border: 1.5px solid #afa9ec;
+}
+.ube:hover:not(:disabled) {
+  background: #afa9ec;
+  color: #26215c;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(127, 119, 221, 0.25);
+}
+.ube:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* ── Spinner ── */
 .spinner {
   width: 14px;
   height: 14px;
-  border: 2px solid rgba(255,255,255,0.35);
+  border: 2px solid rgba(255, 255, 255, 0.35);
   border-top-color: #fff;
   border-radius: 50%;
   animation: spin 0.65s linear infinite;
   flex-shrink: 0;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
 
-.icon { display: flex; align-items: center; }
+/* spinner color for light-bg variants */
+.cancel .spinner,
+.ghost .spinner,
+.vanilla .spinner,
+.ube .spinner {
+  border-color: rgba(131, 24, 67, 0.2);
+  border-top-color: #831843;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+}

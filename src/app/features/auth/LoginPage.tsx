@@ -7,7 +7,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { authService } from "../../core/services/AuthService";
 import { useToast } from "../../shared/hooks";
 import styles from "./LoginPage.module.css";
-import lettuceLogo from "../../../assets/lettuce.jpg";
+import icecreamLogo from "../../../assets/logo.jpg";
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -53,29 +53,20 @@ export const LoginPage: React.FC = () => {
 
           {/* Logo card with badge */}
           <div className={styles.logoCard}>
-            <div className={styles.badge}>Fresh D.</div>
+            <div className={styles.badge}>Ice.</div>
             <img
-              src={lettuceLogo}
-              alt="Lettuce Logo"
+              src={icecreamLogo}
+              alt="Ice Cream Logo"
               className={styles.logoEmoji}
             />
           </div>
 
-          {/* Stars */}
-          <div className={styles.stars}>
-            {[...Array(5)].map((_, i) => (
-              <span key={i} className={styles.star}>
-                ★
-              </span>
-            ))}
-          </div>
-
           {/* Brand title */}
-          <h2 className={styles.brandTitle}>AG Lettuce Be Fresh</h2>
-
+          <h2 className={styles.brandTitle}>Chriselle Ice Cream</h2>
           {/* Tagline */}
           <p className={styles.tagline}>
-            Farm-fresh inventory management,{" "}
+            Sweet Moments in Every Scoop,
+            <br />
             <span className={styles.taglineAccent}>powered by Wave</span>
           </p>
         </div>
@@ -85,14 +76,28 @@ export const LoginPage: React.FC = () => {
       <div className={styles.formWrapper}>
         <div className={styles.card}>
           <div className={styles.logoArea}>
-            <i
-              className="fa-solid fa-leaf"
-              style={{ fontSize: 48, color: "var(--green-600)" }}
-            />
-            <h1>Welcome Back</h1>
-            <p>Sign in to your account</p>
-          </div>
+            <div className={styles.coneScene}>
+              <span className={styles.halo} />
+              {/* sprinkles */}
+              <span className={`${styles.sprinkle} ${styles.sp1}`} />
+              <span className={`${styles.sprinkle} ${styles.sp2}`} />
+              <span className={`${styles.sprinkle} ${styles.sp3}`} />
+              <span className={`${styles.sprinkle} ${styles.sp4}`} />
+              <span className={styles.drip} />
+              <span className={styles.scoop1} />
+              <span className={styles.scoop2} />
+              <span className={styles.scoop3} />
+              <span className={styles.cherry} />
+              <span className={styles.cone} />
+            </div>
+            <h1 className={styles.title} style={{ color: "#ff69b4" }}>
+              Welcome Back
+            </h1>
 
+            <p className={styles.title} style={{ color: "#ff69b4" }}>
+              Sign in to your account
+            </p>
+          </div>
           {error && (
             <div
               className={styles.error}

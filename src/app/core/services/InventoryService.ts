@@ -1,16 +1,18 @@
 // ============================================================
-//  InventoryService  (Angular-style singleton service)
-//  All inventory CRUD, auto-status computation, search/sort.
+//  InventoryService  –  Inventory CRUD, status computation
 // ============================================================
 
-import { SupabaseClient } from '@supabase/supabase-js';
+import { SupabaseClient } from "@supabase/supabase-js";
 import type {
-  InventoryItem, InventoryFormData, InventoryFilter,
-  StockStatus, ServiceResult,
-} from '../../shared/types';
-import { supabase } from '../supabase/client';
+  InventoryItem,
+  InventoryFormData,
+  InventoryFilter,
+  StockStatus,
+  ServiceResult,
+} from "../../shared/types";
+import { supabase } from "../supabase/client";
 
-const TABLE = 'inventory_items';
+const TABLE = "inventory_items";
 
 export class InventoryService {
   private readonly client: SupabaseClient;
@@ -19,35 +21,28 @@ export class InventoryService {
     this.client = client;
   }
 
-  // ── Compute stock status from quantity ─────────────────────
+  // ── Compute stock status ───────────────────────────────────
   computeStatus(quantity: number, threshold = 15): StockStatus {
-    if (quantity === 0)         return 'out-of-stock';
-    if (quantity < threshold)   return 'low-stock';
-    return 'in-stock';
+    if (quantity === 0) return "out-of-stock";
+    if (quantity < threshold) return "low-stock";
+    return "in-stock";
   }
 
-  // ── List with optional filters ─────────────────────────────
+  // ── List ───────────────────────────────────────────────────
   async list(
     farmId: string,
-    filter?: Partial<InventoryFilter>
+    filter?: Partial<InventoryFilter>,
   ): Promise<ServiceResult<InventoryItem[]>> {
-    let query = this.client
-      .from(TABLE)
-      .select('*')
-      .eq('farm_id', farmId);
+    let query = this.client.from(TABLE).select("*").eq("farm_id", farmId);
 
-    if (filter?.status) {
-      query = query.eq('status', filter.status);
-    }
-    if (filter?.search) {
-      query = query.ilike('name', `%${filter.search}%`);
-    }
+    if (filter?.status) query = query.eq("status", filter.status);
+    if (filter?.search) query = query.ilike("name", `%${filter.search}%`);
     if (filter?.sortColumn) {
       query = query.order(filter.sortColumn, {
-        ascending: filter.sortDirection !== 'desc',
+        ascending: filter.sortDirection !== "desc",
       });
     } else {
-      query = query.order('created_at', { ascending: false });
+      query = query.order("created_at", { ascending: false });
     }
 
     const { data, error } = await query;
@@ -55,12 +50,12 @@ export class InventoryService {
     return { data: data as InventoryItem[], error: null };
   }
 
-  // ── Get single item ────────────────────────────────────────
+  // ── Get by ID ──────────────────────────────────────────────
   async getById(id: string): Promise<ServiceResult<InventoryItem>> {
     const { data, error } = await this.client
       .from(TABLE)
-      .select('*')
-      .eq('id', id)
+      .select("*")
+      .eq("id", id)
       .single();
 
     if (error) return { data: null, error: error.message };
@@ -71,18 +66,18 @@ export class InventoryService {
   async create(
     farmId: string,
     formData: InventoryFormData,
-    lowStockThreshold = 15
+    lowStockThreshold = 15,
   ): Promise<ServiceResult<InventoryItem>> {
     const status = this.computeStatus(formData.quantity, lowStockThreshold);
 
     const { data, error } = await this.client
       .from(TABLE)
       .insert({
-        farm_id:       farmId,
-        product_id:    formData.product_id,
-        name:          formData.name,
-        quantity:      formData.quantity,
-        price:         formData.price,
+        farm_id: farmId,
+        product_id: formData.product_id,
+        name: formData.name,
+        quantity: formData.quantity,
+        price: formData.price,
         date_harvested: formData.date_harvested || null,
         status,
         custom_fields: formData.custom_fields ?? {},
@@ -98,7 +93,7 @@ export class InventoryService {
   async update(
     id: string,
     formData: Partial<InventoryFormData>,
-    lowStockThreshold = 15
+    lowStockThreshold = 15,
   ): Promise<ServiceResult<InventoryItem>> {
     const updates: Record<string, unknown> = { ...formData };
 
@@ -109,7 +104,7 @@ export class InventoryService {
     const { data, error } = await this.client
       .from(TABLE)
       .update(updates)
-      .eq('id', id)
+      .eq("id", id)
       .select()
       .single();
 
@@ -119,22 +114,16 @@ export class InventoryService {
 
   // ── Delete single ──────────────────────────────────────────
   async delete(id: string): Promise<ServiceResult<void>> {
-    const { error } = await this.client
-      .from(TABLE)
-      .delete()
-      .eq('id', id);
-
+    const { error } = await this.client.from(TABLE).delete().eq("id", id);
     if (error) return { data: null, error: error.message };
     return { data: undefined, error: null };
   }
 
   // ── Bulk delete ────────────────────────────────────────────
   async deleteBulk(ids: string[]): Promise<ServiceResult<void>> {
-    const { error } = await this.client
-      .from(TABLE)
-      .delete()
-      .in('id', ids);
+    if (ids.length === 0) return { data: undefined, error: null };
 
+    const { error } = await this.client.from(TABLE).delete().in("id", ids);
     if (error) return { data: null, error: error.message };
     return { data: undefined, error: null };
   }
@@ -143,30 +132,40 @@ export class InventoryService {
   async decrementQuantity(
     id: string,
     amount: number,
-    lowStockThreshold = 15
+    lowStockThreshold = 15,
   ): Promise<ServiceResult<InventoryItem>> {
     const current = await this.getById(id);
     if (current.error || !current.data) {
-      return { data: null, error: current.error ?? 'Item not found' };
+      return { data: null, error: current.error ?? "Item not found" };
     }
 
     const newQty = Math.max(0, current.data.quantity - amount);
     return this.update(id, { quantity: newQty }, lowStockThreshold);
   }
 
-  // ── Export to CSV string ───────────────────────────────────
+  // ── Export CSV ─────────────────────────────────────────────
   exportCsv(items: InventoryItem[]): string {
     const headers = [
-      'Product ID', 'Name', 'Quantity', 'Price (₱)',
-      'Total Value (₱)', 'Status', 'Date Harvested',
+      "Product ID",
+      "Name",
+      "Quantity",
+      "Price (₱)",
+      "Total Value (₱)",
+      "Status",
+      "Production Date",
     ];
-    const rows = items.map(i => [
-      i.product_id, i.name, i.quantity, i.price,
-      i.total_value, i.status, i.date_harvested ?? '',
+    const rows = items.map((i) => [
+      i.product_id,
+      i.name,
+      i.quantity,
+      i.price,
+      i.total_value,
+      i.status,
+      i.date_harvested ?? "",
     ]);
     return [headers, ...rows]
-      .map(r => r.map(v => `"${v}"`).join(','))
-      .join('\n');
+      .map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
   }
 }
 

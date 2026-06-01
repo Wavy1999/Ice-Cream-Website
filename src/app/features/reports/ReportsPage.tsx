@@ -81,7 +81,7 @@ const SummaryCard: React.FC<SummaryCardProps> = ({
   label,
   value,
   sub,
-  accent = "#40916c",
+  accent = "#E8647A",
   trend,
 }) => (
   <div className={styles.summaryCard}>
@@ -189,18 +189,21 @@ export const ReportsPage: React.FC = () => {
     (i) => i.status === "out-of-stock",
   ).length;
 
-  // ── Chart colors ───────────────────────────────────────────
+  // ── Chart colors — Ice Cream Parlour palette ───────────────
   const c = {
-    grid: darkMode ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)",
-    text: darkMode ? "#b0b8c0" : "#4a5568",
-    green: "#40916c",
-    greenLight: "#52b788",
-    blue: "#3498db",
-    orange: "#e67e22",
-    red: "#e74c3c",
-    purple: "#9b59b6",
+    grid:        darkMode ? "rgba(255,255,255,0.06)" : "rgba(232,169,106,0.12)",
+    text:        darkMode ? "#F5D9C8"                : "#7A4828",
+    strawberry:  "#E8647A",
+    strawberryL: "#F4A0AE",
+    mint:        "#6BC8A0",
+    mintLight:   "#A8DECC",
+    blueberry:   "#8B7FD4",
+    vanilla:     "#E8C85A",
+    choco:       "#C49A6C",
+    raspberry:   "#D44B64",
   };
 
+  // ── Chart options ──────────────────────────────────────────
   const chartOpts = (title?: string) => ({
     responsive: true,
     maintainAspectRatio: false,
@@ -209,6 +212,7 @@ export const ReportsPage: React.FC = () => {
         labels: {
           color: c.text,
           font: { family: "DM Sans, sans-serif", size: 12 },
+          padding: 16,
         },
       },
       title: title
@@ -220,16 +224,54 @@ export const ReportsPage: React.FC = () => {
           }
         : { display: false },
       tooltip: {
-        backgroundColor: darkMode ? "#1e2228" : "#fff",
-        titleColor: c.text,
-        bodyColor: c.text,
-        borderColor: darkMode ? "#2d3238" : "#e2e8f0",
+        backgroundColor: darkMode ? "#3D2314" : "#FFFFFF",
+        titleColor:  c.text,
+        bodyColor:   c.text,
+        borderColor: darkMode ? "#7A4828" : "#F5D4C0",
         borderWidth: 1,
+        cornerRadius: 10,
+        padding: 10,
       },
     },
     scales: {
-      x: { ticks: { color: c.text }, grid: { color: c.grid } },
-      y: { ticks: { color: c.text }, grid: { color: c.grid } },
+      x: {
+        ticks: { color: c.text },
+        grid:  { color: c.grid },
+        border: { color: "transparent" },
+      },
+      y: {
+        ticks: { color: c.text },
+        grid:  { color: c.grid },
+        border: { color: "transparent" },
+      },
+    },
+  });
+
+  // ── Doughnut options (no scales) ───────────────────────────
+  const doughnutOpts = () => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: "65%",
+    plugins: {
+      legend: {
+        position: "bottom" as const,
+        labels: {
+          color: c.text,
+          font: { family: "DM Sans, sans-serif", size: 12 },
+          padding: 14,
+          usePointStyle: true,
+          pointStyleWidth: 8,
+        },
+      },
+      tooltip: {
+        backgroundColor: darkMode ? "#3D2314" : "#FFFFFF",
+        titleColor:  c.text,
+        bodyColor:   c.text,
+        borderColor: darkMode ? "#7A4828" : "#F5D4C0",
+        borderWidth: 1,
+        cornerRadius: 10,
+        padding: 10,
+      },
     },
   });
 
@@ -249,12 +291,15 @@ export const ReportsPage: React.FC = () => {
       {
         label: "Revenue (₱)",
         data: salesByDay.map(([, v]) => v),
-        borderColor: c.green,
-        backgroundColor: `${c.green}20`,
+        borderColor: c.strawberry,
+        backgroundColor: `${c.strawberry}25`,
         fill: true,
         tension: 0.4,
-        pointRadius: 4,
-        pointHoverRadius: 7,
+        pointRadius: 5,
+        pointHoverRadius: 8,
+        pointBackgroundColor: "#fff",
+        pointBorderColor: c.strawberry,
+        pointBorderWidth: 2,
       },
     ],
   };
@@ -270,23 +315,27 @@ export const ReportsPage: React.FC = () => {
       .slice(0, 8);
   }, [sales]);
 
+  // Ice cream Neapolitan palette for bars
+  const iceCreamPalette = [
+    c.strawberry,
+    c.mint,
+    c.blueberry,
+    c.vanilla,
+    c.strawberryL,
+    c.mintLight,
+    c.choco,
+    c.raspberry,
+  ];
+
   const topProductsBar = {
     labels: topProducts.map(([n]) => n),
     datasets: [
       {
         label: "Revenue (₱)",
         data: topProducts.map(([, v]) => v),
-        backgroundColor: [
-          c.green,
-          c.greenLight,
-          c.blue,
-          c.orange,
-          c.purple,
-          c.red,
-          "#1abc9c",
-          "#e91e63",
-        ],
-        borderRadius: 6,
+        backgroundColor: iceCreamPalette,
+        borderRadius: 10,
+        borderSkipped: false,
       },
     ],
   };
@@ -302,8 +351,9 @@ export const ReportsPage: React.FC = () => {
           orderCounts.fulfilled,
           orderCounts.cancelled,
         ],
-        backgroundColor: [c.orange, c.green, c.red],
+        backgroundColor: [c.vanilla, c.mint, c.strawberry],
         borderWidth: 0,
+        hoverOffset: 6,
       },
     ],
   };
@@ -318,8 +368,9 @@ export const ReportsPage: React.FC = () => {
           lowStockCount,
           outStockCount,
         ],
-        backgroundColor: [c.green, c.orange, c.red],
+        backgroundColor: [c.mint, c.vanilla, c.strawberry],
         borderWidth: 0,
+        hoverOffset: 6,
       },
     ],
   };
@@ -329,7 +380,7 @@ export const ReportsPage: React.FC = () => {
     const map = new Map<string, number>();
     sales.forEach((s) => {
       const d = s.sale_date.slice(0, 10);
-      map.set(d, (map.get(s.product_name) ?? 0) + s.quantity_sold);
+      map.set(d, (map.get(d) ?? 0) + s.quantity_sold);
     });
     return Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b));
   }, [sales]);
@@ -337,7 +388,7 @@ export const ReportsPage: React.FC = () => {
   // ── Export CSV (full report) ───────────────────────────────
   function exportReportCsv() {
     const lines = [
-      ["=== AG Lettuce Be Fresh REPORT ==="],
+      ["=== Chriselle Ice Cream REPORT ==="],
       [`Generated: ${new Date().toLocaleString()}`],
       [`Period: ${bounds.from} to ${bounds.to}`],
       [],
@@ -386,7 +437,7 @@ export const ReportsPage: React.FC = () => {
     const blob = new Blob([csv], { type: "text/csv" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = `lettuce-ims-report-${bounds.from}-to-${bounds.to}.csv`;
+    a.download = `chriselle-icecream-report-${bounds.from}-to-${bounds.to}.csv`;
     a.click();
     toast.success("Report exported as CSV!");
   }
@@ -471,10 +522,10 @@ export const ReportsPage: React.FC = () => {
       <div className={styles.tabs}>
         {(
           [
-            { key: "overview", icon: "fa-gauge-high", label: "Overview" },
-            { key: "sales", icon: "fa-receipt", label: "Sales" },
-            { key: "inventory", icon: "fa-boxes-stacked", label: "Inventory" },
-            { key: "orders", icon: "fa-truck", label: "Orders" },
+            { key: "overview",   icon: "fa-gauge-high",    label: "Overview"   },
+            { key: "sales",      icon: "fa-receipt",       label: "Sales"      },
+            { key: "inventory",  icon: "fa-boxes-stacked", label: "Inventory"  },
+            { key: "orders",     icon: "fa-truck",         label: "Orders"     },
           ] as { key: ReportTab; icon: string; label: string }[]
         ).map((t) => (
           <button
@@ -493,48 +544,16 @@ export const ReportsPage: React.FC = () => {
       ════════════════════════════════ */}
       {tab === "overview" && (
         <div className={styles.tabContent}>
-          {/* Summary cards */}
           <div className={styles.summaryGrid}>
-            <SummaryCard
-              icon="fa-peso-sign"
-              label="Total Revenue"
-              value={fmt(totalRevenue)}
-              accent="#40916c"
-            />
-            <SummaryCard
-              icon="fa-receipt"
-              label="Sales Transactions"
-              value={sales.length}
-              accent="#3498db"
-            />
-            <SummaryCard
-              icon="fa-truck"
-              label="Orders"
-              value={totalOrders}
-              accent="#e67e22"
-            />
-            <SummaryCard
-              icon="fa-circle-check"
-              label="Fulfillment Rate"
-              value={`${fulfillRate.toFixed(1)}%`}
-              accent="#27ae60"
-            />
-            <SummaryCard
-              icon="fa-boxes-stacked"
-              label="Inventory Value"
-              value={fmt(totalInvValue)}
-              accent="#9b59b6"
-            />
-            <SummaryCard
-              icon="fa-triangle-exclamation"
-              label="Stock Alerts"
-              value={lowStockCount + outStockCount}
-              sub={`${lowStockCount} low · ${outStockCount} out`}
-              accent="#e74c3c"
-            />
+            <SummaryCard icon="fa-peso-sign"           label="Total Revenue"       value={fmt(totalRevenue)}                accent="#E8647A" />
+            <SummaryCard icon="fa-receipt"             label="Sales Transactions"  value={sales.length}                     accent="#8B7FD4" />
+            <SummaryCard icon="fa-truck"               label="Orders"              value={totalOrders}                      accent="#E8C85A" />
+            <SummaryCard icon="fa-circle-check"        label="Fulfillment Rate"    value={`${fulfillRate.toFixed(1)}%`}     accent="#6BC8A0" />
+            <SummaryCard icon="fa-boxes-stacked"       label="Inventory Value"     value={fmt(totalInvValue)}               accent="#C49A6C" />
+            <SummaryCard icon="fa-triangle-exclamation" label="Stock Alerts"       value={lowStockCount + outStockCount}    accent="#D44B64"
+              sub={`${lowStockCount} low · ${outStockCount} out`} />
           </div>
 
-          {/* Revenue trend + order status */}
           <div className={styles.chartsRow}>
             <div className={styles.chartCard}>
               <h4 className={styles.chartTitle}>
@@ -554,10 +573,7 @@ export const ReportsPage: React.FC = () => {
               </h4>
               <div className={styles.chartWrap}>
                 {totalOrders > 0 ? (
-                  <Doughnut
-                    data={orderDoughnut}
-                    options={{ ...chartOpts(), scales: undefined } as never}
-                  />
+                  <Doughnut data={orderDoughnut} options={doughnutOpts()} />
                 ) : (
                   <p className={styles.noData}>No orders in this period.</p>
                 )}
@@ -565,7 +581,6 @@ export const ReportsPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Top products */}
           <div className={styles.chartCard}>
             <h4 className={styles.chartTitle}>
               <i className="fa-solid fa-ranking-star" /> Top Products by Revenue
@@ -587,30 +602,10 @@ export const ReportsPage: React.FC = () => {
       {tab === "sales" && (
         <div className={styles.tabContent}>
           <div className={styles.summaryGrid}>
-            <SummaryCard
-              icon="fa-peso-sign"
-              label="Total Revenue"
-              value={fmt(totalRevenue)}
-              accent="#40916c"
-            />
-            <SummaryCard
-              icon="fa-receipt"
-              label="Transactions"
-              value={sales.length}
-              accent="#3498db"
-            />
-            <SummaryCard
-              icon="fa-box"
-              label="Units Sold"
-              value={sales.reduce((s, i) => s + i.quantity_sold, 0)}
-              accent="#9b59b6"
-            />
-            <SummaryCard
-              icon="fa-calculator"
-              label="Avg Sale Value"
-              value={fmt(sales.length ? totalRevenue / sales.length : 0)}
-              accent="#e67e22"
-            />
+            <SummaryCard icon="fa-peso-sign"  label="Total Revenue"   value={fmt(totalRevenue)}                                    accent="#E8647A" />
+            <SummaryCard icon="fa-receipt"    label="Transactions"    value={sales.length}                                         accent="#8B7FD4" />
+            <SummaryCard icon="fa-box"        label="Units Sold"      value={sales.reduce((s, i) => s + i.quantity_sold, 0)}       accent="#6BC8A0" />
+            <SummaryCard icon="fa-calculator" label="Avg Sale Value"  value={fmt(sales.length ? totalRevenue / sales.length : 0)} accent="#E8C85A" />
           </div>
 
           <div className={styles.chartsRow}>
@@ -640,7 +635,6 @@ export const ReportsPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Sales table */}
           <div className={styles.tableCard}>
             <h4 className={styles.chartTitle}>
               <i className="fa-solid fa-table" /> Sales Transactions
@@ -667,11 +661,7 @@ export const ReportsPage: React.FC = () => {
                   ) : (
                     sales.map((s) => (
                       <tr key={s.id}>
-                        <td>
-                          <code className={styles.code}>
-                            {s.transaction_id}
-                          </code>
-                        </td>
+                        <td><code className={styles.code}>{s.transaction_id}</code></td>
                         <td>{s.product_name}</td>
                         <td>{s.quantity_sold}</td>
                         <td>{fmt(s.unit_price)}</td>
@@ -684,9 +674,7 @@ export const ReportsPage: React.FC = () => {
                 {sales.length > 0 && (
                   <tfoot>
                     <tr>
-                      <td colSpan={4} className={styles.footLabel}>
-                        TOTAL
-                      </td>
+                      <td colSpan={4} className={styles.footLabel}>TOTAL</td>
                       <td className={styles.footTotal}>{fmt(totalRevenue)}</td>
                       <td />
                     </tr>
@@ -704,36 +692,11 @@ export const ReportsPage: React.FC = () => {
       {tab === "inventory" && (
         <div className={styles.tabContent}>
           <div className={styles.summaryGrid}>
-            <SummaryCard
-              icon="fa-boxes-stacked"
-              label="Total Products"
-              value={inventory.length}
-              accent="#40916c"
-            />
-            <SummaryCard
-              icon="fa-peso-sign"
-              label="Inventory Value"
-              value={fmt(totalInvValue)}
-              accent="#9b59b6"
-            />
-            <SummaryCard
-              icon="fa-circle-check"
-              label="In Stock"
-              value={inventory.filter((i) => i.status === "in-stock").length}
-              accent="#27ae60"
-            />
-            <SummaryCard
-              icon="fa-triangle-exclamation"
-              label="Low Stock"
-              value={lowStockCount}
-              accent="#e67e22"
-            />
-            <SummaryCard
-              icon="fa-circle-xmark"
-              label="Out of Stock"
-              value={outStockCount}
-              accent="#e74c3c"
-            />
+            <SummaryCard icon="fa-boxes-stacked"        label="Total Products"  value={inventory.length}                                      accent="#E8647A" />
+            <SummaryCard icon="fa-peso-sign"            label="Inventory Value" value={fmt(totalInvValue)}                                     accent="#8B7FD4" />
+            <SummaryCard icon="fa-circle-check"         label="In Stock"        value={inventory.filter((i) => i.status === "in-stock").length} accent="#6BC8A0" />
+            <SummaryCard icon="fa-triangle-exclamation" label="Low Stock"       value={lowStockCount}                                          accent="#E8C85A" />
+            <SummaryCard icon="fa-circle-xmark"         label="Out of Stock"    value={outStockCount}                                          accent="#D44B64" />
           </div>
 
           <div className={styles.chartsRow}>
@@ -742,10 +705,7 @@ export const ReportsPage: React.FC = () => {
                 <i className="fa-solid fa-circle-half-stroke" /> Stock Status
               </h4>
               <div className={styles.chartWrap}>
-                <Doughnut
-                  data={invDoughnut}
-                  options={{ ...chartOpts(), scales: undefined } as never}
-                />
+                <Doughnut data={invDoughnut} options={doughnutOpts()} />
               </div>
             </div>
             <div className={styles.chartCard}>
@@ -761,14 +721,13 @@ export const ReportsPage: React.FC = () => {
                     <Bar
                       data={{
                         labels: top8.map((i) => i.name),
-                        datasets: [
-                          {
-                            label: "Value (₱)",
-                            data: top8.map((i) => i.total_value),
-                            backgroundColor: c.greenLight,
-                            borderRadius: 6,
-                          },
-                        ],
+                        datasets: [{
+                          label: "Value (₱)",
+                          data: top8.map((i) => i.total_value),
+                          backgroundColor: iceCreamPalette,
+                          borderRadius: 10,
+                          borderSkipped: false,
+                        }],
                       }}
                       options={chartOpts()}
                     />
@@ -800,24 +759,18 @@ export const ReportsPage: React.FC = () => {
                 <tbody>
                   {inventory.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className={styles.empty}>
-                        No inventory items.
-                      </td>
+                      <td colSpan={7} className={styles.empty}>No inventory items.</td>
                     </tr>
                   ) : (
                     inventory.map((i) => (
                       <tr key={i.id}>
-                        <td>
-                          <code className={styles.code}>{i.product_id}</code>
-                        </td>
+                        <td><code className={styles.code}>{i.product_id}</code></td>
                         <td>{i.name}</td>
                         <td>{i.quantity}</td>
                         <td>{fmt(i.price)}</td>
                         <td className={styles.bold}>{fmt(i.total_value)}</td>
                         <td>
-                          <span
-                            className={`${styles.badge} ${styles[i.status.replace("-", "")]}`}
-                          >
+                          <span className={`${styles.badge} ${styles[i.status.replace("-", "")]}`}>
                             {i.status}
                           </span>
                         </td>
@@ -838,56 +791,22 @@ export const ReportsPage: React.FC = () => {
       {tab === "orders" && (
         <div className={styles.tabContent}>
           <div className={styles.summaryGrid}>
-            <SummaryCard
-              icon="fa-truck"
-              label="Total Orders"
-              value={totalOrders}
-              accent="#e67e22"
-            />
-            <SummaryCard
-              icon="fa-circle-check"
-              label="Fulfilled"
-              value={fulfilledOrders}
-              accent="#27ae60"
-            />
-            <SummaryCard
-              icon="fa-clock"
-              label="Pending"
-              value={orderCounts.pending}
-              accent="#3498db"
-            />
-            <SummaryCard
-              icon="fa-circle-xmark"
-              label="Cancelled"
-              value={orderCounts.cancelled}
-              accent="#e74c3c"
-            />
-            <SummaryCard
-              icon="fa-percent"
-              label="Fulfillment Rate"
-              value={`${fulfillRate.toFixed(1)}%`}
-              accent="#9b59b6"
-            />
-            <SummaryCard
-              icon="fa-calculator"
-              label="Avg Order Value"
-              value={fmt(avgOrderVal)}
-              accent="#40916c"
-            />
+            <SummaryCard icon="fa-truck"        label="Total Orders"     value={totalOrders}                  accent="#E8C85A" />
+            <SummaryCard icon="fa-circle-check" label="Fulfilled"        value={fulfilledOrders}              accent="#6BC8A0" />
+            <SummaryCard icon="fa-clock"        label="Pending"          value={orderCounts.pending}          accent="#8B7FD4" />
+            <SummaryCard icon="fa-circle-xmark" label="Cancelled"        value={orderCounts.cancelled}        accent="#D44B64" />
+            <SummaryCard icon="fa-percent"      label="Fulfillment Rate" value={`${fulfillRate.toFixed(1)}%`} accent="#E8647A" />
+            <SummaryCard icon="fa-calculator"   label="Avg Order Value"  value={fmt(avgOrderVal)}             accent="#C49A6C" />
           </div>
 
           <div className={styles.chartsRow}>
             <div className={styles.chartCard} style={{ maxWidth: 320 }}>
               <h4 className={styles.chartTitle}>
-                <i className="fa-solid fa-circle-half-stroke" /> Order Status
-                Breakdown
+                <i className="fa-solid fa-circle-half-stroke" /> Order Status Breakdown
               </h4>
               <div className={styles.chartWrap}>
                 {totalOrders > 0 ? (
-                  <Doughnut
-                    data={orderDoughnut}
-                    options={{ ...chartOpts(), scales: undefined } as never}
-                  />
+                  <Doughnut data={orderDoughnut} options={doughnutOpts()} />
                 ) : (
                   <p className={styles.noData}>No orders in this period.</p>
                 )}
@@ -895,17 +814,13 @@ export const ReportsPage: React.FC = () => {
             </div>
             <div className={styles.chartCard}>
               <h4 className={styles.chartTitle}>
-                <i className="fa-solid fa-chart-bar" /> Orders by Customer (Top
-                8)
+                <i className="fa-solid fa-chart-bar" /> Orders by Customer (Top 8)
               </h4>
               <div className={styles.chartWrap}>
                 {(() => {
                   const map = new Map<string, number>();
                   orders.forEach((o) =>
-                    map.set(
-                      o.customer_name,
-                      (map.get(o.customer_name) ?? 0) + o.total_price,
-                    ),
+                    map.set(o.customer_name, (map.get(o.customer_name) ?? 0) + o.total_price),
                   );
                   const top8 = Array.from(map.entries())
                     .sort(([, a], [, b]) => b - a)
@@ -914,14 +829,13 @@ export const ReportsPage: React.FC = () => {
                     <Bar
                       data={{
                         labels: top8.map(([n]) => n),
-                        datasets: [
-                          {
-                            label: "Order Value (₱)",
-                            data: top8.map(([, v]) => v),
-                            backgroundColor: c.orange,
-                            borderRadius: 6,
-                          },
-                        ],
+                        datasets: [{
+                          label: "Order Value (₱)",
+                          data: top8.map(([, v]) => v),
+                          backgroundColor: iceCreamPalette,
+                          borderRadius: 10,
+                          borderSkipped: false,
+                        }],
                       }}
                       options={chartOpts()}
                     />
@@ -952,9 +866,7 @@ export const ReportsPage: React.FC = () => {
                 <tbody>
                   {orders.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className={styles.empty}>
-                        No orders in this period.
-                      </td>
+                      <td colSpan={6} className={styles.empty}>No orders in this period.</td>
                     </tr>
                   ) : (
                     orders.map((o) => (
@@ -965,9 +877,7 @@ export const ReportsPage: React.FC = () => {
                         <td className={styles.bold}>{fmt(o.total_price)}</td>
                         <td>{o.order_date}</td>
                         <td>
-                          <span
-                            className={`${styles.badge} ${styles[o.status]}`}
-                          >
+                          <span className={`${styles.badge} ${styles[o.status]}`}>
                             {o.status}
                           </span>
                         </td>

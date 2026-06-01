@@ -1,5 +1,5 @@
 // ============================================================
-//  DataTable  –  Generic sortable, paginated table
+//  DataTable  –  Generic sortable, paginated table (ice cream theme)
 // ============================================================
 
 import React from "react";
@@ -7,34 +7,48 @@ import type { PaginationState } from "../../../types";
 import styles from "./DataTable.module.css";
 
 export interface Column<T> {
-  key: keyof T | string;
-  header: string;
+  key:       keyof T | string;
+  header:    string;
   sortable?: boolean;
-  width?: string;
-  render?: (row: T) => React.ReactNode;
-  /** data-testid suffix */
-  testId?: string;
+  width?:    string;
+  render?:   (row: T) => React.ReactNode;
+  testId?:   string;
 }
 
 interface DataTableProps<T> {
-  columns: Column<T>[];
-  data: T[];
-  rowKey: (row: T) => string;
-  pagination?: PaginationState;
-  totalPages?: number;
+  columns:       Column<T>[];
+  data:          T[];
+  rowKey:        (row: T) => string;
+  pagination?:   PaginationState;
+  totalPages?:   number;
   onPageChange?: (page: number) => void;
-  sortColumn?: string | null;
-  sortDir?: "asc" | "desc";
-  onSort?: (col: string) => void;
-  selectable?: boolean;
-  selected?: Set<string>;
-  onToggleRow?: (id: string) => void;
-  onToggleAll?: (ids: string[], checked: boolean) => void;
-  loading?: boolean;
+  sortColumn?:   string | null;
+  sortDir?:      "asc" | "desc";
+  onSort?:       (col: string) => void;
+  selectable?:   boolean;
+  selected?:     Set<string>;
+  onToggleRow?:  (id: string) => void;
+  onToggleAll?:  (ids: string[], checked: boolean) => void;
+  loading?:      boolean;
   emptyMessage?: string;
-  className?: string;
-  testId?: string;
+  className?:    string;
+  testId?:       string;
 }
+
+// ── Loading skeleton rows ────────────────────────────────────
+const SkeletonRows: React.FC<{ cols: number }> = ({ cols }) => (
+  <>
+    {Array.from({ length: 5 }).map((_, i) => (
+      <tr key={i} className={styles.skeletonRow} style={{ animationDelay: `${i * 0.07}s` }}>
+        {Array.from({ length: cols }).map((_, j) => (
+          <td key={j}>
+            <span className={styles.skeletonCell} style={{ width: `${55 + (j * 17) % 35}%` }} />
+          </td>
+        ))}
+      </tr>
+    ))}
+  </>
+);
 
 export function DataTable<T>({
   columns,
@@ -55,14 +69,16 @@ export function DataTable<T>({
   className = "",
   testId,
 }: DataTableProps<T>) {
-  const allIds = data.map(rowKey);
-  const allChecked =
-    selectable && allIds.length > 0 && allIds.every((id) => selected?.has(id));
+  const allIds     = data.map(rowKey);
+  const allChecked = selectable && allIds.length > 0 && allIds.every(id => selected?.has(id));
+  const colSpan    = columns.length + (selectable ? 1 : 0);
 
   return (
     <div className={`${styles.wrapper} ${className}`} data-testid={testId}>
       <div className={styles.tableScroll}>
         <table className={styles.table}>
+
+          {/* ── Head ── */}
           <thead>
             <tr>
               {selectable && (
@@ -70,29 +86,30 @@ export function DataTable<T>({
                   <input
                     type="checkbox"
                     checked={!!allChecked}
-                    onChange={(e) => onToggleAll?.(allIds, e.target.checked)}
+                    onChange={e => onToggleAll?.(allIds, e.target.checked)}
                     data-testid="select-all"
                     aria-label="Select all"
                   />
                 </th>
               )}
-              {columns.map((col) => (
+              {columns.map(col => (
                 <th
                   key={String(col.key)}
                   style={{ width: col.width }}
                   className={col.sortable ? styles.sortable : ""}
-                  onClick={
-                    col.sortable ? () => onSort?.(String(col.key)) : undefined
-                  }
+                  onClick={col.sortable ? () => onSort?.(String(col.key)) : undefined}
                   data-testid={`th-${String(col.key)}`}
+                  aria-sort={
+                    sortColumn === String(col.key)
+                      ? sortDir === "asc" ? "ascending" : "descending"
+                      : undefined
+                  }
                 >
                   {col.header}
                   {col.sortable && (
-                    <span className={styles.sortIcon}>
-                      {sortColumn === col.key
-                        ? sortDir === "asc"
-                          ? " ↑"
-                          : " ↓"
+                    <span className={styles.sortIcon} aria-hidden>
+                      {sortColumn === String(col.key)
+                        ? sortDir === "asc" ? " ↑" : " ↓"
                         : " ↕"}
                     </span>
                   )}
@@ -100,32 +117,25 @@ export function DataTable<T>({
               ))}
             </tr>
           </thead>
+
+          {/* ── Body ── */}
           <tbody data-testid="table-body">
             {loading ? (
-              <tr>
-                <td
-                  colSpan={columns.length + (selectable ? 1 : 0)}
-                  className={styles.empty}
-                >
-                  <div className="spinner" />
-                </td>
-              </tr>
+              <SkeletonRows cols={colSpan} />
             ) : data.length === 0 ? (
               <tr>
-                <td
-                  colSpan={columns.length + (selectable ? 1 : 0)}
-                  className={styles.empty}
-                >
+                <td colSpan={colSpan} className={styles.empty}>
                   {emptyMessage}
                 </td>
               </tr>
             ) : (
-              data.map((row) => {
+              data.map((row, rowIndex) => {
                 const id = rowKey(row);
                 return (
                   <tr
                     key={id}
                     className={selected?.has(id) ? styles.selectedRow : ""}
+                    style={{ animationDelay: `${Math.min(rowIndex, 9) * 0.03}s` }}
                     data-testid={`row-${id}`}
                   >
                     {selectable && (
@@ -139,20 +149,14 @@ export function DataTable<T>({
                         />
                       </td>
                     )}
-                    {columns.map((col) => (
+                    {columns.map(col => (
                       <td
                         key={String(col.key)}
-                        data-testid={
-                          col.testId ? `${col.testId}-${id}` : undefined
-                        }
+                        data-testid={col.testId ? `${col.testId}-${id}` : undefined}
                       >
                         {col.render
                           ? col.render(row)
-                          : String(
-                              (row as Record<string, unknown>)[
-                                col.key as string
-                              ] ?? "",
-                            )}
+                          : String((row as Record<string, unknown>)[col.key as string] ?? "")}
                       </td>
                     ))}
                   </tr>
@@ -163,53 +167,52 @@ export function DataTable<T>({
         </table>
       </div>
 
+      {/* ── Pagination ── */}
       {pagination && totalPages > 1 && (
         <div className={styles.pagination} data-testid="pagination">
           <span className={styles.pageInfo}>
             Page {pagination.page} / {totalPages}
-            &nbsp;({pagination.total} total)
+            &nbsp;· {pagination.total} total
           </span>
           <div className={styles.pageButtons}>
             <button
               onClick={() => onPageChange?.(1)}
               disabled={pagination.page === 1}
+              aria-label="First page"
               data-testid="pg-first"
-            >
-              «
-            </button>
+            >«</button>
             <button
               onClick={() => onPageChange?.(pagination.page - 1)}
               disabled={pagination.page === 1}
+              aria-label="Previous page"
               data-testid="pg-prev"
-            >
-              ‹
-            </button>
+            >‹</button>
+
             {Array.from({ length: totalPages }, (_, i) => i + 1)
-              .filter((p) => Math.abs(p - pagination.page) <= 2)
-              .map((p) => (
+              .filter(p => Math.abs(p - pagination.page) <= 2)
+              .map(p => (
                 <button
                   key={p}
                   onClick={() => onPageChange?.(p)}
                   className={p === pagination.page ? styles.activePage : ""}
+                  aria-label={`Page ${p}`}
+                  aria-current={p === pagination.page ? "page" : undefined}
                   data-testid={`pg-${p}`}
-                >
-                  {p}
-                </button>
+                >{p}</button>
               ))}
+
             <button
               onClick={() => onPageChange?.(pagination.page + 1)}
               disabled={pagination.page === totalPages}
+              aria-label="Next page"
               data-testid="pg-next"
-            >
-              ›
-            </button>
+            >›</button>
             <button
               onClick={() => onPageChange?.(totalPages)}
               disabled={pagination.page === totalPages}
+              aria-label="Last page"
               data-testid="pg-last"
-            >
-              »
-            </button>
+            >»</button>
           </div>
         </div>
       )}

@@ -1,5 +1,5 @@
 // ============================================================
-//  AG Lettuce Be Fresh – Shared Types
+//  Chriselle Ice Cream – Shared Types
 //  Single source of truth for all domain types.
 // ============================================================
 
@@ -71,6 +71,8 @@ export interface Sale {
   total_amount: number; // computed by DB
   sale_date: string;
   created_at: string;
+  flavor?: string;
+  status?: string; 
 }
 
 export interface SaleFormData {

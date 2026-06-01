@@ -1,5 +1,5 @@
 // ============================================================
-//  SalesPage  –  Sales feature
+//  SalesPage  –  Sales feature (ice cream theme)
 // ============================================================
 
 import React, { useState } from 'react';
@@ -29,9 +29,8 @@ export const SalesPage: React.FC = () => {
   const [saving,     setSaving]     = useState(false);
   const [deleting,   setDeleting]   = useState(false);
 
-  // Sale form state
-  const [selInvId,   setSelInvId]   = useState('');
-  const [qty,        setQty]        = useState(1);
+  const [selInvId, setSelInvId] = useState('');
+  const [qty,      setQty]      = useState(1);
 
   const threshold = settings?.low_stock_threshold ?? 15;
 
@@ -58,20 +57,22 @@ export const SalesPage: React.FC = () => {
     queryClient.invalidateQueries({ queryKey: ['inventory'] });
   };
 
+  function resetModal() {
+    setModalOpen(false);
+    setSelInvId('');
+    setQty(1);
+  }
+
   async function handleSaveSale(e: React.FormEvent) {
     e.preventDefault();
     if (!selectedItem) return;
     setSaving(true);
-
     const formData: SaleFormData = { inventory_item_id: selInvId, quantity_sold: qty };
     const result = await salesService.recordSale(farm!.id, formData, selectedItem, threshold);
-
     setSaving(false);
     if (result.error) { toast.error(result.error); return; }
-    toast.success('Sale recorded!');
-    setModalOpen(false);
-    setSelInvId('');
-    setQty(1);
+    toast.success('Sale recorded! 🍦');
+    resetModal();
     invalidate();
   }
 
@@ -80,7 +81,7 @@ export const SalesPage: React.FC = () => {
     const result = await salesService.deleteBulk(sel.ids);
     setDeleting(false);
     if (result.error) { toast.error(result.error); return; }
-    toast.success(`${sel.ids.length} sale(s) deleted.`);
+    toast.success(`${sel.ids.length} sale(s) deleted. 🍒`);
     sel.clear();
     setDeleteOpen(false);
     invalidate();
@@ -90,44 +91,69 @@ export const SalesPage: React.FC = () => {
     `₱${Number(n).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`;
 
   const COLUMNS: Column<Record<string, unknown>>[] = [
-    { key: 'transaction_id', header: 'TX ID',       sortable: true },
-    { key: 'product_name',   header: 'Product',      sortable: true },
-    { key: 'quantity_sold',  header: 'Qty Sold',     sortable: true },
-    { key: 'unit_price',     header: 'Unit Price',   render: r => fmt(r.unit_price as number) },
-    { key: 'total_amount',   header: 'Total',        render: r => fmt(r.total_amount as number) },
-    { key: 'sale_date',      header: 'Date',         render: r => new Date(r.sale_date as string).toLocaleDateString() },
+    { key: 'transaction_id', header: 'TX ID',     sortable: true },
+    { key: 'product_name',   header: 'Product',   sortable: true },
+    { key: 'quantity_sold',  header: 'Qty Sold',  sortable: true },
+    { key: 'unit_price',     header: 'Unit Price', render: r => fmt(r.unit_price as number) },
+    { key: 'total_amount',   header: 'Total',      render: r => fmt(r.total_amount as number) },
+    {
+      key: 'sale_date',
+      header: 'Date',
+      render: r => new Date(r.sale_date as string).toLocaleDateString(),
+    },
   ];
 
   const totalRevenue = salesService.getTotalRevenue(sales);
 
   return (
     <section className={styles.page} data-testid="sales-page">
-      {/* Revenue summary */}
-      <div className={styles.revenueBanner} data-testid="revenue-banner">
-        <i className="fa-solid fa-chart-line" />
+
+      {/* ── Revenue banner ── */}
+      <div className={styles.revenueBanner} data-testid="revenue-banner" aria-label="Total revenue summary">
+        <i className="fa-solid fa-ice-cream" aria-hidden />
         <span>Total Revenue: <strong>{fmt(totalRevenue)}</strong></span>
         <span className={styles.revSub}>({sales.length} transactions)</span>
       </div>
 
+      {/* ── Toolbar ── */}
       <div className={styles.toolbar}>
         <div className={styles.filters}>
           <input
-            placeholder="Search product / TX ID…"
+            placeholder="🔍 Search product / TX ID…"
             value={search}
             onChange={e => setSearch(e.target.value)}
+            aria-label="Search sales"
             data-testid="sales-search"
           />
-          <input type="date" value={dateFrom} onChange={e=>setDateFrom(e.target.value)} data-testid="sales-date-from" />
-          <input type="date" value={dateTo}   onChange={e=>setDateTo(e.target.value)}   data-testid="sales-date-to" />
+          <input
+            type="date"
+            value={dateFrom}
+            onChange={e => setDateFrom(e.target.value)}
+            aria-label="From date"
+            data-testid="sales-date-from"
+          />
+          <input
+            type="date"
+            value={dateTo}
+            onChange={e => setDateTo(e.target.value)}
+            aria-label="To date"
+            data-testid="sales-date-to"
+          />
         </div>
         <div className={styles.toolbarRight}>
           {sel.count > 0 && (
-            <Button variant="danger" size="sm" onClick={() => setDeleteOpen(true)} data-testid="btn-bulk-delete-sales">
-              <i className="fa-solid fa-trash" /> Delete ({sel.count})
+            <Button
+              variant="danger" size="sm"
+              icon={<i className="fa-solid fa-trash" aria-hidden />}
+              onClick={() => setDeleteOpen(true)}
+              data-testid="btn-bulk-delete-sales"
+            >
+              Delete ({sel.count})
             </Button>
           )}
           <Button
-            variant="primary" size="sm"
+            variant="ghost" size="sm"
+            icon={<i className="fa-solid fa-download" aria-hidden />}
             onClick={() => {
               const csv  = salesService.exportCsv(sales);
               const blob = new Blob([csv], { type: 'text/csv' });
@@ -138,14 +164,20 @@ export const SalesPage: React.FC = () => {
             }}
             data-testid="btn-export-sales"
           >
-            <i className="fa-solid fa-download" /> Export
+            Export
           </Button>
-          <Button variant="success" size="sm" onClick={() => setModalOpen(true)} data-testid="btn-add-sale">
-            <i className="fa-solid fa-plus" /> New Sale
+          <Button
+            variant="primary" size="sm"
+            icon={<i className="fa-solid fa-plus" aria-hidden />}
+            onClick={() => setModalOpen(true)}
+            data-testid="btn-add-sale"
+          >
+            New Sale
           </Button>
         </div>
       </div>
 
+      {/* ── Table ── */}
       <DataTable
         columns={COLUMNS}
         data={paged as unknown as Record<string, unknown>[]}
@@ -158,27 +190,39 @@ export const SalesPage: React.FC = () => {
         onToggleRow={sel.toggle}
         onToggleAll={sel.toggleAll}
         loading={salesLoading}
-        emptyMessage="No sales yet. Record your first sale!"
+        emptyMessage="No sales yet — ring up your first scoop! 🍦"
         testId="sales-table"
       />
 
-      {/* New Sale Modal */}
+      {/* ── New Sale Modal ── */}
       <Modal
         open={modalOpen}
-        onClose={() => { setModalOpen(false); setSelInvId(''); setQty(1); }}
-        title="🛒 New Sales Transaction"
+        onClose={resetModal}
+        title="New Sales Transaction"
+        size="md"
         data-testid="sale-modal"
+        footer={
+          <>
+            <Button variant="cancel" type="button" onClick={resetModal} data-testid="btn-cancel-sale">
+              Cancel
+            </Button>
+            <Button variant="success" type="submit" form="sale-form" loading={saving} data-testid="btn-confirm-sale">
+              Complete Sale
+            </Button>
+          </>
+        }
       >
-        <form onSubmit={handleSaveSale} data-testid="sale-form">
+        <form id="sale-form" onSubmit={handleSaveSale} data-testid="sale-form">
           <div className={styles.formGroup}>
-            <label>Select Product *</label>
+            <label htmlFor="sale-product-select">Select Product *</label>
             <select
+              id="sale-product-select"
               value={selInvId}
               onChange={e => { setSelInvId(e.target.value); setQty(1); }}
               required
               data-testid="sale-product-select"
             >
-              <option value="">-- Choose a product --</option>
+              <option value="">— Choose a flavour —</option>
               {availableItems.map(i => (
                 <option key={i.id} value={i.id}>
                   {i.name} (in stock: {i.quantity}) — ₱{i.price}
@@ -189,8 +233,9 @@ export const SalesPage: React.FC = () => {
 
           <div className={styles.formRow}>
             <div className={styles.formGroup}>
-              <label>Quantity *</label>
+              <label htmlFor="sale-quantity">Quantity *</label>
               <input
+                id="sale-quantity"
                 type="number"
                 value={qty}
                 onChange={e => setQty(+e.target.value)}
@@ -201,52 +246,59 @@ export const SalesPage: React.FC = () => {
               />
             </div>
             <div className={styles.formGroup}>
-              <label>Unit Price (₱)</label>
+              <label htmlFor="sale-unit-price">Unit Price (₱)</label>
               <input
+                id="sale-unit-price"
                 type="text"
-                value={selectedItem ? `₱${selectedItem.price}` : ''}
+                value={selectedItem ? fmt(selectedItem.price) : ''}
                 readOnly
+                aria-readonly="true"
                 data-testid="sale-unit-price"
               />
             </div>
           </div>
 
           <div className={styles.formGroup}>
-            <label>Total Amount (₱)</label>
+            <label htmlFor="sale-total">Total Amount (₱)</label>
             <input
+              id="sale-total"
               type="text"
-              value={selectedItem ? `₱${(selectedItem.price * qty).toFixed(2)}` : ''}
+              value={selectedItem ? fmt(selectedItem.price * qty) : ''}
               readOnly
+              aria-readonly="true"
               data-testid="sale-total"
             />
-          </div>
-
-          <div className={styles.modalFooter}>
-            <Button variant="cancel" type="button" onClick={() => { setModalOpen(false); setSelInvId(''); setQty(1); }} data-testid="btn-cancel-sale">
-              Cancel
-            </Button>
-            <Button variant="success" type="submit" loading={saving} data-testid="btn-confirm-sale">
-              Complete Sale
-            </Button>
           </div>
         </form>
       </Modal>
 
-      {/* Delete Confirm */}
+      {/* ── Delete Confirm Modal ── */}
       <Modal
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
-        title="⚠️ Confirm Delete"
-        maxWidth="400px"
+        title="Confirm Delete"
+        size="sm"
         footer={
           <>
-            <Button variant="cancel" onClick={() => setDeleteOpen(false)}>Cancel</Button>
-            <Button variant="danger" onClick={handleDeleteConfirm} loading={deleting} data-testid="btn-confirm-delete-sale">Delete</Button>
+            <Button variant="cancel" onClick={() => setDeleteOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              onClick={handleDeleteConfirm}
+              loading={deleting}
+              data-testid="btn-confirm-delete-sale"
+            >
+              Delete
+            </Button>
           </>
         }
       >
-        <p>Delete <strong>{sel.count}</strong> sale(s)?</p>
+        <p style={{ color: '#831843', fontWeight: 600 }}>
+          Delete <strong>{sel.count}</strong> sale(s)? 🍒
+        </p>
       </Modal>
+
     </section>
   );
 };

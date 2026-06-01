@@ -23,7 +23,7 @@ export const SettingsPage: React.FC = () => {
   const toast = useToast();
 
   const [appName, setAppName] = useState(
-    settings?.app_name ?? "AG Lettuce Be Fresh",
+    settings?.app_name ?? "Chriselle Ice Cream",
   );
   const [threshold, setThreshold] = useState(
     settings?.low_stock_threshold ?? 15,
@@ -107,7 +107,7 @@ export const SettingsPage: React.FC = () => {
             <input
               value={appName}
               onChange={(e) => setAppName(e.target.value)}
-              placeholder="AG Lettuce Be Fresh"
+              placeholder="Chriselle Ice Cream"
               data-testid="setting-app-name"
             />
           </div>
@@ -239,7 +239,7 @@ export const SettingsPage: React.FC = () => {
         </h3>
         <div className={styles.dbInfo}>
           <span className={styles.dbBadge}>
-            <i className="fa-solid fa-circle" style={{ color: "#40916c" }} />{" "}
+            <i className="fa-solid fa-circle" style={{ color: "#6BC8A0" }} />{" "}
             Supabase Connected
           </span>
           <p className={styles.hint}>

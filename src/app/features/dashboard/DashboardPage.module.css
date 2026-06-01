@@ -1,6 +1,50 @@
-.page { display: flex; flex-direction: column; gap: 24px; }
+:root {
+  --bg-card: #ffffff;
+  --bg-secondary: #fff8fb;
+  --bg-page: #fff0f6;
+  --border-card: #fce7f3;
+  --border-color: #fce7f3;
+  --text-primary: #831843;
+  --text-muted: #be185d;
+  --shadow-sm: 0 2px 8px rgba(236, 72, 153, 0.08);
+  --shadow-md: 0 8px 24px rgba(236, 72, 153, 0.18);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --transition-normal: 0.2s ease;
+  --green-500: #1d9e75;
+  --green-600: #0f6e56;
 
-/* Stats Grid */
+  /* flavor accents */
+  --flavor-strawberry: #fce7f3;
+  --flavor-mint: #e1f5ee;
+  --flavor-vanilla: #faeeda;
+  --flavor-ube: #eeedfe;
+}
+
+/* ── Page ── */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  background: var(--bg-page);
+  padding: 24px;
+  min-height: 100vh;
+  animation: pageFadeIn 0.5s ease both;
+}
+
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Stats Grid ── */
 .statsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -9,20 +53,49 @@
 
 .statCard {
   background: var(--bg-card);
-  border: 1px solid var(--border-card);
+  border: 1.5px solid var(--border-card);
   border-radius: var(--radius-lg);
   padding: 20px;
   display: flex;
   align-items: center;
   gap: 16px;
   box-shadow: var(--shadow-sm);
-  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+  transition:
+    transform var(--transition-normal),
+    box-shadow var(--transition-normal);
+  animation: cardPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
+
+.statCard:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.statCard:nth-child(2) {
+  animation-delay: 0.12s;
+}
+.statCard:nth-child(3) {
+  animation-delay: 0.19s;
+}
+.statCard:nth-child(4) {
+  animation-delay: 0.26s;
+}
+
+@keyframes cardPop {
+  from {
+    opacity: 0;
+    transform: scale(0.88) translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
 .statCard:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
   box-shadow: var(--shadow-md);
 }
 
+/* ── Stat Icon ── */
 .statIcon {
   width: 48px;
   height: 48px;
@@ -30,19 +103,76 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   flex-shrink: 0;
+  animation: iconWobble 3.5s ease-in-out infinite;
 }
 
-.statBody  { flex: 1; min-width: 0; }
+.statCard:nth-child(1) .statIcon {
+  animation-delay: 0s;
+}
+.statCard:nth-child(2) .statIcon {
+  animation-delay: 0.5s;
+}
+.statCard:nth-child(3) .statIcon {
+  animation-delay: 1s;
+}
+.statCard:nth-child(4) .statIcon {
+  animation-delay: 1.5s;
+}
+
+@keyframes iconWobble {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+  20% {
+    transform: rotate(-8deg) scale(1.08);
+  }
+  40% {
+    transform: rotate(7deg) scale(1.08);
+  }
+  60% {
+    transform: rotate(-3deg) scale(1);
+  }
+  80% {
+    transform: rotate(2deg) scale(1);
+  }
+}
+
+/* Flavor variants */
+.statIcon.strawberry {
+  background: var(--flavor-strawberry);
+  color: #db2777;
+}
+.statIcon.mint {
+  background: var(--flavor-mint);
+  color: #0f6e56;
+}
+.statIcon.vanilla {
+  background: var(--flavor-vanilla);
+  color: #854f0b;
+}
+.statIcon.ube {
+  background: var(--flavor-ube);
+  color: #534ab7;
+}
+
+/* ── Stat Body ── */
+.statBody {
+  flex: 1;
+  min-width: 0;
+}
+
 .statLabel {
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 4px;
 }
+
 .statValue {
   font-size: 1.35rem;
   font-weight: 800;
@@ -52,9 +182,14 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.statSub   { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
 
-/* Charts Row */
+.statSub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ── Charts Row ── */
 .chartsRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -63,22 +198,34 @@
 
 .chartCard {
   background: var(--bg-card);
-  border: 1px solid var(--border-card);
+  border: 1.5px solid var(--border-card);
   border-radius: var(--radius-lg);
   padding: 20px;
   box-shadow: var(--shadow-sm);
+  animation: cardPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
+  transition:
+    transform var(--transition-normal),
+    box-shadow var(--transition-normal);
+}
+
+.chartCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .chartTitle {
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--text-primary);
   margin-bottom: 16px;
   display: flex;
   align-items: center;
   gap: 8px;
 }
-.chartTitle i { color: var(--green-500); }
+
+.chartTitle i {
+  color: var(--green-500);
+}
 
 .chartWrap {
   height: 220px;
@@ -94,13 +241,22 @@
   font-size: 0.88rem;
 }
 
-/* Recent Sales */
+/* ── Recent Sales ── */
 .recentCard {
   background: var(--bg-card);
-  border: 1px solid var(--border-card);
+  border: 1.5px solid var(--border-card);
   border-radius: var(--radius-lg);
   padding: 20px;
   box-shadow: var(--shadow-sm);
+  animation: cardPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.45s both;
+  transition:
+    transform var(--transition-normal),
+    box-shadow var(--transition-normal);
+}
+
+.recentCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .recentTable {
@@ -109,6 +265,7 @@
   font-size: 0.875rem;
   margin-top: 12px;
 }
+
 .recentTable th {
   text-align: left;
   padding: 10px 12px;
@@ -119,24 +276,78 @@
   color: var(--text-muted);
   border-bottom: 2px solid var(--border-color);
 }
+
 .recentTable td {
   padding: 10px 12px;
   border-bottom: 1px solid var(--border-color);
   color: var(--text-primary);
 }
-.recentTable tbody tr:last-child td { border-bottom: none; }
-.recentTable tbody tr:hover { background: var(--bg-secondary); }
-.recentTable code {
+
+.recentTable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.recentTable tbody tr {
+  transition: background var(--transition-normal);
+}
+
+.recentTable tbody tr:hover {
   background: var(--bg-secondary);
+}
+
+.recentTable code {
+  background: var(--flavor-strawberry);
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 0.8rem;
   color: var(--green-600);
 }
 
-@media (max-width: 900px) {
-  .chartsRow { grid-template-columns: 1fr; }
+/* ── Status pills ── */
+.pill {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
 }
+
+.pill.delivered {
+  background: var(--flavor-mint);
+  color: #0f6e56;
+}
+.pill.preparing {
+  background: var(--flavor-strawberry);
+  color: #9d174d;
+}
+.pill.pending {
+  background: var(--flavor-vanilla);
+  color: #854f0b;
+}
+
+/* ── Flavor dot (table) ── */
+.flavorDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .chartsRow {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 600px) {
-  .statsGrid { grid-template-columns: 1fr 1fr; }
+  .statsGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .page {
+    padding: 16px;
+  }
 }
